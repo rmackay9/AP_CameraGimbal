@@ -43,6 +43,19 @@ def sha256(path):
     return digest.hexdigest()
 
 
+def extract_toolchain(archive, destination):
+    with tarfile.open(archive) as tar:
+        if sys.version_info >= (3, 12):
+            tar.extractall(destination, filter='data')
+            return
+        members = tar.getmembers()
+        for member in members:
+            member_path = Path(member.name)
+            if member_path.is_absolute() or '..' in member_path.parts:
+                raise RuntimeError(f'Unsafe path in toolchain archive: {member.name}')
+        tar.extractall(destination, members=members)
+
+
 def toolchain(name):
     directory, url, digest, prefix = TOOLCHAINS[name]
     base = BUILD / 'toolchains'
@@ -62,8 +75,7 @@ def toolchain(name):
         if sha256(archive) != digest:
             raise RuntimeError(f'Toolchain checksum mismatch: {archive}')
         with tempfile.TemporaryDirectory(prefix='extract-', dir=base) as work:
-            with tarfile.open(archive) as tar:
-                tar.extractall(work, filter='data')
+            extract_toolchain(archive, work)
             (Path(work) / directory).rename(target)
         stamp.write_text(digest + '\n')
     compiler = str(target / 'bin' / prefix)
