@@ -280,6 +280,11 @@ static int read_config(struct ca_config *config, FILE *file,
         errno = EINVAL;
         goto fail;
     }
+    if (!apcam_gimbal_link_valid(parsed.gimbal_link)) {
+        snprintf(error, error_size, "Gimbal link must be blank, a /dev serial device, udp://IPv4:PORT or tcp://IPv4:PORT");
+        errno = EINVAL;
+        goto fail;
+    }
     *config = parsed;
     return 0;
 

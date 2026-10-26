@@ -386,6 +386,10 @@ private:
          offsetof(struct ca_config, video1_uri),
          sizeof(((struct ca_config *)0)->video1_uri), NULL, 0U, 0, 159, NULL},
 #endif
+#if APCAM_HAVE_GIMBAL_LINK
+        {"network", "gimbal_link", Kind::String, offsetof(struct ca_config, gimbal_link),
+         sizeof(((struct ca_config *)0)->gimbal_link), NULL, 0U, 0, 159, NULL},
+#endif
 #if APCAM_HAVE_THERMAL || APCAM_HAVE_RAW_THERMAL
         {"thermal", "stream_fps", Kind::Uint, offsetof(struct ca_config, raw_stream_fps),
          sizeof(((struct ca_config *)0)->raw_stream_fps), NULL, 0U, 1, 25, "RAW_STREAM_FPS"},

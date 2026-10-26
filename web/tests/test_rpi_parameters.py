@@ -113,6 +113,34 @@ try:
     help_text = re.search(r"<div class=help>([^<]*)<code>\[network\] video1_uri</code>", page)
     assert help_text and "Requires camera app restart." not in help_text.group(1), help_text
 
+    # The gimbal link offers suggestions but accepts any valid value.
+    assert "network_gimbal_link" in values, sorted(values)
+    assert "list=gimbal_link_choices" in page and "<datalist id=gimbal_link_choices>" in page
+    for choice in ("/dev/ttyAMA0", "udp://192.168.144.15:15002"):
+        assert f'<option value="{choice}">' in page, choice
+    values["network_gimbal_link"] = "udp://192.168.144.15:15002"
+    status, body = save(values)
+    assert status in (200, 303), (status, re.sub(r"<[^>]+>", " ", body)[:600])
+    link_saved = camera_ini.read_text(encoding="utf-8")
+    assert re.search(r'^gimbal_link = "?udp://192\.168\.144\.15:15002"?$', link_saved, re.M), link_saved
+    for invalid in ("/etc/passwd", "/dev/../etc/passwd", "udp://example.com:15002",
+                    "udp://192.168.144.15", "udp://192.168.144.15:0", "tcp://example.com:1",
+                    "tcp://192.168.144.15", "tcp://192.168.144.15:0", "http://192.168.144.15:1"):
+        _, values = parameters()
+        values["network_gimbal_link"] = invalid
+        save(values)
+        assert camera_ini.read_text(encoding="utf-8") == link_saved, invalid
+    _, values = parameters()
+    assert values["network_gimbal_link"] == "udp://192.168.144.15:15002"
+    values["network_gimbal_link"] = "tcp://192.168.144.15:15002"
+    assert save(values)[0] in (200, 303)
+    assert re.search(r'^gimbal_link = "?tcp://192\.168\.144\.15:15002"?$', camera_ini.read_text(encoding="utf-8"), re.M)
+    _, values = parameters()
+    values["network_gimbal_link"] = "/dev/ttyAMA0"
+    assert save(values)[0] in (200, 303)
+    assert re.search(r'^gimbal_link = "?/dev/ttyAMA0"?$', camera_ini.read_text(encoding="utf-8"), re.M)
+
+    _, values = parameters()
     values["network_video1_uri"] = "rtsp://10.0.2.100:9000/camera/main"
     status, body = save(values)
     assert status in (200, 303), (status, body[:500])

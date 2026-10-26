@@ -77,6 +77,10 @@
 #ifndef APCAM_HAVE_NETWORK_CONFIG
 #define APCAM_HAVE_NETWORK_CONFIG 1
 #endif
+/* Targets whose gimbal link is chosen in the configuration set this to 1. */
+#ifndef APCAM_HAVE_GIMBAL_LINK
+#define APCAM_HAVE_GIMBAL_LINK 0
+#endif
 #ifndef APCAM_LOG_ROOT
 #define APCAM_LOG_ROOT "/mnt/logs"
 #endif

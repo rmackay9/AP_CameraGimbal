@@ -305,7 +305,7 @@ static int write_ready(const struct ca_backend *backend, unsigned port,
 static void usage(const char *program)
 {
 #if APCAM_TARGET == APCAM_TARGET_RPI_LIBCAM_CADDX
-    ca_log("Usage: %s [--backend " APCAM_NAME "] [--uart DEVICE|udp://IPv4:PORT] [--port PORT] "
+    ca_log("Usage: %s [--backend " APCAM_NAME "] [--uart DEVICE|udp://IPv4:PORT|tcp://IPv4:PORT] [--port PORT] "
            "[--config PATH]", program);
 #else
     ca_log("Usage: %s [--backend mt11|a8|zr10|zt30|z1mini] [--uart DEVICE|udp://IPv4:PORT] [--port PORT] "
@@ -328,6 +328,7 @@ int APC_CameraApp::run(int argc, char **argv)
         environment_string("CAMERA_APP_CONFIG", CA_CONFIG_DEFAULT_PATH);
     unsigned port = environment_port("CAMERA_APP_PORT", DEFAULT_PORT);
     struct ca_backend_config config = {};
+    bool uart_from_command_line = false;
     struct ca_config app_config;
     char config_error[192] = "";
     int i;
@@ -340,6 +341,7 @@ int APC_CameraApp::run(int argc, char **argv)
             backend_name = argv[++i];
         } else if (strcmp(argv[i], "--uart") == 0 && i + 1 < argc) {
             uart_device = argv[++i];
+            uart_from_command_line = true;
         } else if (strcmp(argv[i], "--port") == 0 && i + 1 < argc) {
             char *end;
             unsigned long value = strtoul(argv[++i], &end, 10);
@@ -366,6 +368,11 @@ int APC_CameraApp::run(int argc, char **argv)
                config_error[0] != '\0' ? config_error : strerror(errno));
         return 2;
     }
+#if APCAM_HAVE_GIMBAL_LINK
+    /* --uart overrides the configured link; the environment is the fallback. */
+    if (app_config.gimbal_link[0] != '\0' && !uart_from_command_line)
+        uart_device = app_config.gimbal_link;
+#endif
     #ifdef CAMERA_APP_ZT30_RAM
     ca_zt30::ram_app_configure(app_config);
     #endif

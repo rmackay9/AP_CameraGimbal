@@ -174,6 +174,9 @@ struct ca_config {
     /* Complete URI advertised for stream 1 on host-OS targets; empty = built
      * from the host. Size: APCAM_VIDEO_URI_SIZE. */
     char video1_uri[160];
+    /* Gimbal link on targets with APCAM_HAVE_GIMBAL_LINK: a /dev serial device,
+     * udp://IPv4:PORT or tcp://IPv4:PORT; empty = CAMERA_APP_UART. Size: APCAM_GIMBAL_LINK_SIZE. */
+    char gimbal_link[160];
     struct ca_support_config support;
     char timezone[CA_CONFIG_TIMEZONE_MAX];
     enum ca_photo_scope photo_scope;

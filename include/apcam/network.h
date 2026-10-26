@@ -44,6 +44,34 @@ static inline bool apcam_video_uri_valid(const char *text)
     }
     return *rest == '\0' || *rest == '/';
 }
+/* The gimbal link: a serial device under /dev, or udp://IPv4:PORT or
+ * tcp://IPv4:PORT. Blank means none is configured. */
+#define APCAM_GIMBAL_LINK_SIZE 160
+static inline bool apcam_gimbal_link_valid(const char *text)
+{
+    size_t length = strlen(text);
+    if (length >= APCAM_GIMBAL_LINK_SIZE)
+        return false;
+    if (!length)
+        return true;
+    if (!strncmp(text, "/dev/", 5))
+        return length > 5 && !strstr(text, "..") &&
+               strspn(text + 5, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._/-") == length - 5;
+    if (strncmp(text, "udp://", 6) && strncmp(text, "tcp://", 6))
+        return false;
+    const char *colon = strchr(text + 6, ':');
+    size_t host_length = colon ? (size_t)(colon - (text + 6)) : 0;
+    if (!colon || host_length >= 16)
+        return false;
+    char host[16];
+    memcpy(host, text + 6, host_length);
+    host[host_length] = '\0';
+    struct in_addr address;
+    if (strcmp(host, "localhost") && inet_pton(AF_INET, host, &address) != 1)
+        return false;
+    size_t digits = strspn(colon + 1, "0123456789");
+    return digits && digits <= 5 && colon[1 + digits] == '\0' && atoi(colon + 1) >= 1 && atoi(colon + 1) <= 65535;
+}
 static inline bool apcam_ipv4_prefix(const char *text, struct in_addr *address, unsigned *prefix)
 {
     char copy[32], *end;
