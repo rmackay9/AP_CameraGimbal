@@ -512,6 +512,12 @@ rpi_libcam_caddx:
 	$(MAKE) -C camera_app CAMERA_BACKEND=rpi_libcam_caddx CROSS_COMPILE='$(RPI_CROSS_COMPILE)'
 	$(MAKE) -C web CAMERA_BACKEND=rpi_libcam_caddx RPI_CROSS_COMPILE='$(RPI_CROSS_COMPILE)' rpi_libcam_caddx-web
 
+# The pinned rclone that the Raspberry Pi package bundles for cloud upload (see
+# its README). Needs a 64-bit Raspberry Pi OS.
+.PHONY: rpi_rclone
+rpi_rclone:
+	tools/fetch_rclone.sh '$(DEPS_ROOT)/rclone'
+
 Z1MINI_SITL_BUILD ?= build/z1mini-sitl
 $(Z1MINI_SITL_BUILD)/main.h264: $(A8_SITL_BUILD)/main.h264
 	mkdir -p $(dir $@)

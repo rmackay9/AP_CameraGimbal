@@ -28,6 +28,7 @@ inputs:
 | tcpdump | 4.99.6 | BSD-3-Clause | <https://www.tcpdump.org/release/tcpdump-4.99.6.tar.xz> |
 | libxcrypt | 4.5.2 | LGPL-2.1-or-later | <https://github.com/besser82/libxcrypt/releases/tag/v4.5.2> |
 | Dropbear SSH | 2026.94 | MIT | <https://matt.ucc.asn.au/dropbear/releases/dropbear-2026.94.tar.bz2> |
+| rclone (Raspberry Pi package, uploads) | v1.75.2 | MIT | <https://github.com/rclone/rclone/releases/tag/v1.75.2> |
 
 The bootstrap script verifies the downloaded minimp4 header against its pinned
 SHA-256. The camera build copies that header and applies
