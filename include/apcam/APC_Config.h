@@ -182,6 +182,17 @@ private:
 #endif
     };
 
+#if APCAM_HAVE_UPLOAD
+    inline static constexpr ca_config_option upload_what_options[] = {
+        {"photos", CA_UPLOAD_WHAT_PHOTOS}, {"recordings", CA_UPLOAD_WHAT_RECORDINGS},
+        {"both", CA_UPLOAD_WHAT_BOTH},
+    };
+    inline static constexpr ca_config_option upload_after_options[] = {
+        {"keep", CA_UPLOAD_AFTER_KEEP}, {"delete", CA_UPLOAD_AFTER_DELETE},
+        {"delete_when_low", CA_UPLOAD_AFTER_DELETE_WHEN_LOW},
+    };
+#endif
+
     inline static constexpr Field _fields[] = {
 #ifdef CAMERA_APP_ZT30_DEV
         {"thermal", "hfov_cd", Kind::Uint, offsetof(ca_config, thermal_hfov_cd), sizeof(unsigned), NULL, 0, 0, 17900, "THERMAL_HFOV_CD"},
@@ -393,6 +404,24 @@ private:
 #if APCAM_HAVE_THERMAL || APCAM_HAVE_RAW_THERMAL
         {"thermal", "record_fps", Kind::Uint, offsetof(struct ca_config, raw_record_fps),
          sizeof(((struct ca_config *)0)->raw_record_fps), NULL, 0U, 0, 25, "RAW_RECORD_FPS"},
+#endif
+#if APCAM_HAVE_UPLOAD
+        {"upload", "enable", Kind::Bool, offsetof(struct ca_config, upload_enable),
+         sizeof(((struct ca_config *)0)->upload_enable), NULL, 0U, 0, 1, NULL},
+        {"upload", "remote", Kind::String, offsetof(struct ca_config, upload_remote),
+         sizeof(((struct ca_config *)0)->upload_remote), NULL, 0U, 0, APCAM_UPLOAD_REMOTE_SIZE - 1, NULL},
+        {"upload", "what", Kind::Enum, offsetof(struct ca_config, upload_what),
+         sizeof(((struct ca_config *)0)->upload_what), upload_what_options,
+         sizeof(upload_what_options) / sizeof(upload_what_options[0]), 0, 0, NULL},
+        {"upload", "after_upload", Kind::Enum, offsetof(struct ca_config, upload_after),
+         sizeof(((struct ca_config *)0)->upload_after), upload_after_options,
+         sizeof(upload_after_options) / sizeof(upload_after_options[0]), 0, 0, NULL},
+        {"upload", "low_space_percent", Kind::Uint, offsetof(struct ca_config, upload_low_space_percent),
+         sizeof(((struct ca_config *)0)->upload_low_space_percent), NULL, 0U, 1, 90, NULL},
+        {"upload", "bandwidth_kib_s", Kind::Uint, offsetof(struct ca_config, upload_bandwidth_kib_s),
+         sizeof(((struct ca_config *)0)->upload_bandwidth_kib_s), NULL, 0U, 0, 1000000, NULL},
+        {"upload", "scan_minutes", Kind::Uint, offsetof(struct ca_config, upload_scan_minutes),
+         sizeof(((struct ca_config *)0)->upload_scan_minutes), NULL, 0U, 1, 1440, NULL},
 #endif
     };
 

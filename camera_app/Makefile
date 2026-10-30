@@ -167,7 +167,8 @@ COMMON_SOURCES := $(if $(filter z1mini,$(CAMERA_BACKEND)),src/protocol/xfrobot_s
 	src/recording/still.cpp \
 	src/recording/metadata.cpp \
 	src/recording/video_metadata.cpp \
-	$(CONTROL_DIR)/control.cpp
+	$(CONTROL_DIR)/control.cpp \
+	$(if $(filter rpi_libcam_caddx,$(CAMERA_BACKEND)),src/upload/uploader.cpp)
 OBJECTS := $(COMMON_SOURCES:.cpp=.o) build/mt11_media.o build/mt11_overlay.o build/mt11_pipeline.o \
 	build/mt11_e5739.o build/mt11_thermal.o build/mt11_isp.o \
 	build/raw_thermal_server.o \
@@ -206,7 +207,7 @@ A8_HOST_SOURCES := $(filter-out src/backends/mt11/control.cpp \
 # RPi target with stub media, for host tests of its MAVLink behaviour.
 RPI_HOST_TARGET := tests/camera-app-rpi-host
 RPI_HOST_SOURCES := $(filter-out $(CONTROL_DIR)/control.cpp src/protocol/unigcs.cpp,$(COMMON_SOURCES)) \
-	src/backends/caddx/control.cpp src/media/stub.cpp
+	src/backends/caddx/control.cpp src/media/stub.cpp src/upload/uploader.cpp
 SITL_VARIANT := $(if $(filter mt11,$(CAMERA_BACKEND)),sitl,$(CAMERA_BACKEND)-sitl)
 SITL_TARGET ?= ../build/$(SITL_VARIANT)/camera-app
 SITL_OBJDIR ?= build/$(SITL_VARIANT)
@@ -1114,7 +1115,7 @@ zt30-thermal-metadata-test: $(THERMAL_CODECS_ROOT)/host/lib/libavcodec.a $(THERM
 	$(HOST_CXX) -std=gnu++17 -O2 -Wall -Wextra -Werror -Wno-missing-field-initializers -DCA_THERMAL_STREAM_FFV1 -DCAMERA_APP_ZT30_DEV -DAPCAM_TARGET=APCAM_TARGET_ZT30 -Iinclude -I../include -I$(THERMAL_CODECS_ROOT)/host/include -ffunction-sections -fdata-sections -Wl,--gc-sections ../tests/test_zt30_thermal_metadata.cpp $(THERMAL_CODECS_ROOT)/host/lib/libavcodec.a $(THERMAL_CODECS_ROOT)/host/lib/libavutil.a $(call thermal_extra_libs,host) -pthread -lm -o build/tests/zt30-thermal-metadata-test
 	./build/tests/zt30-thermal-metadata-test
 
-# Cloud upload: the rclone supervisor.
+# Cloud upload: the rclone supervisor and the RPi target using it.
 tests/test_uploader: tests/test_uploader.cpp src/upload/uploader.cpp include/camera_app/uploader.h src/log.cpp tests/fake_rclone.sh
 	$(call progress,Linking $@)
 	$(HOST_CXX) -Iinclude $(APP_CXXFLAGS) -o $@ $(filter %.cpp,$^)
@@ -1123,3 +1124,8 @@ tests/test_uploader: tests/test_uploader.cpp src/upload/uploader.cpp include/cam
 uploader-test: tests/test_uploader
 	./tests/test_uploader
 test: uploader-test
+
+.PHONY: rpi-upload-test
+rpi-upload-test: $(RPI_HOST_TARGET)
+	python3 tests/test_rpi_upload.py ./$(RPI_HOST_TARGET)
+test: rpi-upload-test

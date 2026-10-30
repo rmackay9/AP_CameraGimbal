@@ -133,4 +133,15 @@
 #ifndef APCAM_HAVE_THERMAL_VIDEO
 #define APCAM_HAVE_THERMAL_VIDEO APCAM_HAVE_THERMAL
 #endif
+/* Targets that can upload photos and recordings to a cloud remote with rclone
+ * set this to 1, and the default rclone locations. */
+#ifndef APCAM_HAVE_UPLOAD
+#define APCAM_HAVE_UPLOAD 0
+#endif
+#ifndef APCAM_RCLONE_PATH
+#define APCAM_RCLONE_PATH ""
+#endif
+#ifndef APCAM_RCLONE_CONFIG
+#define APCAM_RCLONE_CONFIG ""
+#endif
 #endif

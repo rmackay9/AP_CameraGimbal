@@ -557,6 +557,8 @@ int APC_CameraApp::run(int argc, char **argv)
     if (!gimbal_ready) { ca_log("Z1 gimbal feedback unavailable"); return result; }
 #endif
     ca_metadata_set_model(APCAM_MODEL_NAME);
+    const char *rclone_path = environment_string("CAMERA_APP_RCLONE", APCAM_RCLONE_PATH);
+    const char *rclone_config = environment_string("CAMERA_APP_RCLONE_CONFIG", APCAM_RCLONE_CONFIG);
     struct ca_mavlink_server_config mavlink_config = {
         .manual_control = &_manual.active,
         .tcp_port = mavlink_tcp_port,
@@ -574,6 +576,8 @@ int APC_CameraApp::run(int argc, char **argv)
         .settings = app_config,
         .backend = _backend,
         .media = _media,
+        .rclone_path = rclone_path,
+        .rclone_config = rclone_config,
     };
     if (ca_mavlink_server_open(&_mavlink_server, &mavlink_config) < 0) {
         ca_log("cannot initialize MAVLink: %s", strerror(errno));
